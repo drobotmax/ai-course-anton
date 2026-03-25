@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agents Mastery – Курс для Антона</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #232733;
+    --surface-3: #2c3040;
+    --border: #333847;
+    --text: #e4e7f1;
+    --text-secondary: #9399ad;
+    --accent: #6c5ce7;
+    --accent-light: #a29bfe;
+    --green: #00cec9;
+    --green-dim: rgba(0,206,201,0.15);
+    --orange: #fdcb6e;
+    --orange-dim: rgba(253,203,110,0.15);
+    --red: #ff6b6b;
+    --blue: #74b9ff;
+    --purple: #a29bfe;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+
+  .sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-light), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sidebar-header .subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .progress-bar-container {
+    margin: 16px 20px 0;
+    background: var(--surface-3);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    padding: 0 20px;
+  }
+
+  .nav-section { padding: 8px 12px; }
+
+  .nav-phase {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    padding: 12px 8px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item.active { background: rgba(108,92,231,0.15); color: var(--accent-light); }
+  .nav-item.completed .nav-dot { background: var(--green); box-shadow: 0 0 8px rgba(0,206,201,0.4); border-color: var(--green); }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .nav-item.active .nav-dot { background: var(--accent); border-color: var(--accent); }
+
+  /* Main */
+  .main {
+    flex: 1;
+    margin-left: 290px;
+    padding: 40px 60px;
+    max-width: 920px;
+  }
+
+  .lesson { display: none; }
+  .lesson.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .lesson-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .badge-theory { background: rgba(116,185,255,0.15); color: var(--blue); }
+  .badge-practice { background: var(--green-dim); color: var(--green); }
+  .badge-project { background: var(--orange-dim); color: var(--orange); }
+  .badge-challenge { background: rgba(255,107,107,0.15); color: var(--red); }
+
+  .lesson h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .lesson h3 { font-size: 20px; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+  .lesson h4 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
+  .lesson p { margin-bottom: 14px; color: var(--text); }
+  .lesson ul, .lesson ol { margin: 0 0 16px 20px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .lesson-meta {
+    display: flex; gap: 16px;
+    font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  /* Info blocks */
+  .info-block {
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  .info-block .block-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .info-block p { margin-bottom: 6px; font-size: 14px; }
+
+  .tip { background: rgba(108,92,231,0.1); border-left: 3px solid var(--accent); }
+  .tip .block-title { color: var(--accent-light); }
+
+  .key-concept { background: rgba(0,206,201,0.08); border-left: 3px solid var(--green); }
+  .key-concept .block-title { color: var(--green); }
+
+  .warning { background: rgba(255,107,107,0.08); border-left: 3px solid var(--red); }
+  .warning .block-title { color: var(--red); }
+
+  /* Code blocks */
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+
+  .code-block .comment { color: #5a6078; }
+  .code-block .accent { color: var(--accent-light); }
+  .code-block .highlight { color: var(--green); }
+  .code-block .string { color: #a8cc8c; }
+  .code-block .keyword { color: #c792ea; }
+
+  /* Comparison blocks */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .comparison-bad, .comparison-good {
+    padding: 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+  }
+  .comparison-bad { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); }
+  .comparison-good { background: rgba(0,206,201,0.08); border: 1px solid rgba(0,206,201,0.2); }
+  .comparison-label { font-weight: 700; font-size: 12px; margin-bottom: 8px; }
+  .comparison-text { font-size: 13px; line-height: 1.6; }
+
+  /* Resources */
+  .resources { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+
+  .resource-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .resource-link:hover { border-color: var(--accent); background: var(--surface-2); }
+
+  .resource-icon { font-size: 24px; flex-shrink: 0; }
+  .resource-info { flex: 1; }
+  .resource-title { font-weight: 600; font-size: 14px; }
+  .resource-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .resource-tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .tag-video { background: rgba(255,107,107,0.15); color: var(--red); }
+  .tag-article { background: rgba(116,185,255,0.15); color: var(--blue); }
+  .tag-tool { background: rgba(0,206,201,0.15); color: var(--green); }
+  .tag-docs { background: rgba(162,155,254,0.15); color: var(--purple); }
+  .tag-course { background: var(--orange-dim); color: var(--orange); }
+
+  /* Task list */
+  .task-list { list-style: none; margin: 16px 0; padding: 0; }
+
+  .task-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(51,56,71,0.5);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .task-item:hover { opacity: 0.85; }
+
+  .task-checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .task-item.done .task-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .task-item.done .task-checkbox::after {
+    content: '✓';
+    position: absolute;
+    top: -1px; left: 3px;
+    font-size: 13px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .task-item.done .task-text {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  .task-text { font-size: 14px; }
+
+  /* Navigation */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #5b4bd5; }
+  .btn-secondary { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--surface-3); }
+  .btn-complete { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,206,201,0.3); }
+  .btn-complete:hover { background: rgba(0,206,201,0.25); }
+  .btn-complete.completed { background: var(--green); color: #fff; }
+
+  /* Welcome */
+  .welcome-hero { text-align: center; padding: 40px 0 30px; }
+  .emoji-big { font-size: 64px; margin-bottom: 16px; }
+  .welcome-hero p { color: var(--text-secondary); max-width: 600px; margin: 12px auto; font-size: 15px; }
+
+  .stat-row { display: flex; justify-content: center; gap: 40px; margin: 30px 0; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 36px; font-weight: 800; color: var(--accent-light); }
+  .stat-label { font-size: 13px; color: var(--text-secondary); }
+
+  .phase-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 24px 0; }
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .phase-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .phase-num { font-size: 11px; font-weight: 700; color: var(--accent-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .phase-card h4 { font-size: 15px; margin-bottom: 6px; }
+  .phase-card p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+
+  /* Mobile */
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 800px) {
+    .mobile-toggle { display: block; }
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 60px 20px 40px; }
+    .comparison { grid-template-columns: 1fr; }
+    .stat-row { gap: 20px; }
+    .phase-cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h1>AI Agents Mastery</h1>
+      <div class="subtitle">Персональный курс для Антона</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="progress-text" id="progressText">0 / 30 уроков</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-phase">Фаза 1 – Основы AI</div>
+      <div class="nav-item" data-lesson="1-1" onclick="goTo('1-1')"><span class="nav-dot"></span> Как устроены LLM</div>
+      <div class="nav-item" data-lesson="1-2" onclick="goTo('1-2')"><span class="nav-dot"></span> Ландшафт AI 2026</div>
+      <div class="nav-item" data-lesson="1-3" onclick="goTo('1-3')"><span class="nav-dot"></span> Мультимодальность</div>
+
+      <div class="nav-phase">Фаза 2 – Промт-инжиниринг</div>
+      <div class="nav-item" data-lesson="2-1" onclick="goTo('2-1')"><span class="nav-dot"></span> Анатомия промта</div>
+      <div class="nav-item" data-lesson="2-2" onclick="goTo('2-2')"><span class="nav-dot"></span> Продвинутые техники</div>
+      <div class="nav-item" data-lesson="2-3" onclick="goTo('2-3')"><span class="nav-dot"></span> Промты для бизнеса</div>
+
+      <div class="nav-phase">Фаза 3 – Vibe Coding</div>
+      <div class="nav-item" data-lesson="3-1" onclick="goTo('3-1')"><span class="nav-dot"></span> Google AI Studio</div>
+      <div class="nav-item" data-lesson="3-2" onclick="goTo('3-2')"><span class="nav-dot"></span> Cursor и Claude Code</div>
+      <div class="nav-item" data-lesson="3-3" onclick="goTo('3-3')"><span class="nav-dot"></span> Replit Agent</div>
+
+      <div class="nav-phase">Фаза 4 – Python</div>
+      <div class="nav-item" data-lesson="4-1" onclick="goTo('4-1')"><span class="nav-dot"></span> Основы Python</div>
+      <div class="nav-item" data-lesson="4-2" onclick="goTo('4-2')"><span class="nav-dot"></span> Функции и данные</div>
+      <div class="nav-item" data-lesson="4-3" onclick="goTo('4-3')"><span class="nav-dot"></span> ООП и async</div>
+      <div class="nav-item" data-lesson="4-4" onclick="goTo('4-4')"><span class="nav-dot"></span> Telegram-бот</div>
+
+      <div class="nav-phase">Фаза 5 – LLM API</div>
+      <div class="nav-item" data-lesson="5-1" onclick="goTo('5-1')"><span class="nav-dot"></span> OpenAI API</div>
+      <div class="nav-item" data-lesson="5-2" onclick="goTo('5-2')"><span class="nav-dot"></span> Claude API</div>
+      <div class="nav-item" data-lesson="5-3" onclick="goTo('5-3')"><span class="nav-dot"></span> Другие модели</div>
+
+      <div class="nav-phase">Фаза 6 – RAG</div>
+      <div class="nav-item" data-lesson="6-1" onclick="goTo('6-1')"><span class="nav-dot"></span> Основы RAG</div>
+      <div class="nav-item" data-lesson="6-2" onclick="goTo('6-2')"><span class="nav-dot"></span> RAG на практике</div>
+      <div class="nav-item" data-lesson="6-3" onclick="goTo('6-3')"><span class="nav-dot"></span> Продвинутый RAG</div>
+
+      <div class="nav-phase">Фаза 7 – AI-агенты</div>
+      <div class="nav-item" data-lesson="7-1" onclick="goTo('7-1')"><span class="nav-dot"></span> Что такое агент</div>
+      <div class="nav-item" data-lesson="7-2" onclick="goTo('7-2')"><span class="nav-dot"></span> LangGraph</div>
+      <div class="nav-item" data-lesson="7-3" onclick="goTo('7-3')"><span class="nav-dot"></span> Мультиагенты</div>
+
+      <div class="nav-phase">Фаза 8 – No-Code</div>
+      <div class="nav-item" data-lesson="8-1" onclick="goTo('8-1')"><span class="nav-dot"></span> n8n автоматизация</div>
+      <div class="nav-item" data-lesson="8-2" onclick="goTo('8-2')"><span class="nav-dot"></span> Weweb + AI</div>
+
+      <div class="nav-phase">Фаза 9 – Голос и деплой</div>
+      <div class="nav-item" data-lesson="9-1" onclick="goTo('9-1')"><span class="nav-dot"></span> STT и TTS</div>
+      <div class="nav-item" data-lesson="9-2" onclick="goTo('9-2')"><span class="nav-dot"></span> Локальные модели</div>
+      <div class="nav-item" data-lesson="9-3" onclick="goTo('9-3')"><span class="nav-dot"></span> Деплой</div>
+
+      <div class="nav-phase">Фаза 10 – Бизнес</div>
+      <div class="nav-item" data-lesson="10-1" onclick="goTo('10-1')"><span class="nav-dot"></span> Продажа AI-проектов</div>
+      <div class="nav-item" data-lesson="10-2" onclick="goTo('10-2')"><span class="nav-dot"></span> AI SaaS продукт</div>
+      <div class="nav-item" data-lesson="10-3" onclick="goTo('10-3')"><span class="nav-dot"></span> Финальный проект</div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ══════════ WELCOME ══════════ -->
+    <div class="lesson active" id="lesson-welcome">
+      <div class="welcome-hero">
+        <div class="emoji-big">🤖</div>
+        <h2>Добро пожаловать, Антон!</h2>
+        <p>Этот курс сделает тебя <strong>разработчиком AI-агентов</strong> — от первого промта до продакшн-системы с RAG, голосом и автоматизацией. Без воды, с реальными проектами и материалами.</p>
+        <p style="font-size:13px; color: var(--text-secondary); margin-top: 16px;">Аналог платного курса за 150–210K ₽. Только лучше и бесплатно.</p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="stat-num">30</div><div class="stat-label">Уроков</div></div>
+        <div class="stat"><div class="stat-num">10</div><div class="stat-label">Фаз</div></div>
+        <div class="stat"><div class="stat-num">8</div><div class="stat-label">Проектов</div></div>
+      </div>
+
+      <div class="phase-cards">
+        <div class="phase-card" onclick="goTo('1-1')">
+          <div class="phase-num">Фаза 1-2</div>
+          <h4>🧠 Основы и промтинг</h4>
+          <p>Как работают LLM, промт-инжиниринг от базы до продвинутого</p>
+        </div>
+        <div class="phase-card" onclick="goTo('3-1')">
+          <div class="phase-num">Фаза 3</div>
+          <h4>⚡ Vibe Coding</h4>
+          <p>Создание приложений через AI без написания кода</p>
+        </div>
+        <div class="phase-card" onclick="goTo('4-1')">
+          <div class="phase-num">Фаза 4-5</div>
+          <h4>💻 Python и LLM API</h4>
+          <p>Python с нуля, работа с API OpenAI, Claude, Gemini</p>
+        </div>
+        <div class="phase-card" onclick="goTo('6-1')">
+          <div class="phase-num">Фаза 6-7</div>
+          <h4>🤖 RAG и агенты</h4>
+          <p>Базы знаний, LangGraph, мультиагентные системы</p>
+        </div>
+        <div class="phase-card" onclick="goTo('8-1')">
+          <div class="phase-num">Фаза 8-9</div>
+          <h4>🔧 No-Code и деплой</h4>
+          <p>n8n, голосовые AI, Docker, продакшн</p>
+        </div>
+        <div class="phase-card" onclick="goTo('10-1')">
+          <div class="phase-num">Фаза 10</div>
+          <h4>💰 Бизнес</h4>
+          <p>Продажа AI-проектов, SaaS, монетизация</p>
+        </div>
+      </div>
+
+      <div class="info-block tip">
+        <div class="block-title">💡 Как проходить курс</div>
+        <p><strong>Темп:</strong> 1–2 урока в день, по 30–60 минут. Весь курс за 4–8 недель.</p>
+        <p><strong>Правило:</strong> не переходи к следующему уроку, пока не выполнил задания. Отмечай галочками — прогресс сохраняется в браузере.</p>
+        <p><strong>Инструменты:</strong> держи открытыми ChatGPT (chat.openai.com) и Claude (claude.ai) — будешь практиковаться в реальном времени.</p>
+      </div>
+
+      <div class="lesson-nav">
+        <div></div>
+        <button class="btn btn-primary" onclick="goTo('1-1')">Начать курс →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 1-1: Как устроены LLM ══════════ -->
+    <div class="lesson" id="lesson-1-1">
+      <span class="lesson-badge badge-theory">Теория</span>
+      <h2>Как устроены LLM</h2>
+      <div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 1, Урок 1</span></div>
+
+      <p>Прежде чем строить AI-агентов, нужно понимать, как работает ядро — <strong>Large Language Model</strong>. Это не магия и не разум. Это математическая машина, которая невероятно хорошо предсказывает следующее слово.</p>
+
+      <h3>Как LLM генерирует текст</h3>
+      <p>Представь автозаполнение в телефоне, но в миллиард раз мощнее. LLM прочитала весь интернет и научилась: если написано "столица Франции —", то дальше скорее всего "Париж". Это называется <strong>авторегрессивная генерация</strong> — модель генерирует по одному токену за раз.</p>
+
+      <div class="info-block key-concept">
+        <div class="block-title">🔑 Ключевые понятия</div>
+        <p><strong>Токен</strong> — кусочек текста (примерно ¾ слова). "Привет мир" = 2–3 токена.</p>
+        <p><strong>Контекстное окно</strong> — сколько токенов модель "видит" за раз. GPT-4o: 128K, Claude: 200K, Gemini: 1M+.</p>
+        <p><strong>Temperature</strong> — параметр "креативности". 0 = детерминированный, 1 = творческий, >1 = хаотичный.</p>
+        <p><strong>Top-p</strong> — из скольких вариантов следующего слова модель выбирает. 0.1 = очень точно, 0.9 = разнообразно.</p>
+      </div>
+
+      <h3>Трансформер — архитектура под капотом</h3>
+      <p>Все современные LLM (GPT, Claude, Gemini, Llama) построены на архитектуре <strong>Transformer</strong> (2017, Google). Ключевая идея — <strong>механизм внимания (attention)</strong>: модель взвешивает важность каждого слова для каждого другого слова в тексте. Это позволяет понимать контекст на расстоянии.</p>
+
+      <h3>Почему LLM "галлюцинирует"</h3>
+      <p>LLM не знает, что правда, а что нет — она знает, что <strong>звучит правдоподобно</strong>. Если модель не видела ответ в данных, она сгенерирует что-то похожее на правду. Отсюда — "галлюцинации". Это не баг, это фундаментальное свойство.</p>
+
+      <div class="info-block tip">
+        <div class="block-title">💡 Практический вывод</div>
+        <p>Никогда не доверяй LLM факты без проверки. Но для генерации текста, кода, идей, анализа — это мощнейший инструмент. Задача AI-разработчика — выстроить систему, которая компенсирует галлюцинации (RAG, проверки, guardrails).</p>
+      </div>
+
+      <h3>Сравнение моделей 2026</h3>
+      <ul>
+        <li><strong>GPT-4o (OpenAI)</strong> — универсал, быстрый, хорош для всего. Мультимодальный.</li>
+        <li><strong>Claude Opus/Sonnet (Anthropic)</strong> — лучший для длинных текстов, кода, анализа. Огромный контекст (200K).</li>
+        <li><strong>Gemini 2.0 (Google)</strong> — рекордное контекстное окно (1M+), интеграция с Google.</li>
+        <li><strong>DeepSeek V3</strong> — open-source, хорош в математике и коде, бесплатный.</li>
+        <li><strong>GigaChat (Сбер)</strong> — русскоязычный, знает российский контекст.</li>
+        <li><strong>Llama 3 (Meta)</strong> — open-source, можно запускать локально.</li>
+      </ul>
+
+      <h3>Материалы для изучения</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Intro to Large Language Models — Andrej Karpathy</div>
+            <div class="resource-desc">Создатель AI в Tesla объясняет LLM за 1 час. Лучшее введение в тему.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Нейросети — 3Blue1Brown</div>
+            <div class="resource-desc">Визуальное объяснение нейронных сетей. Серия из 4 видео.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+        <a class="resource-link" href="https://ig.ft.com/generative-ai/" target="_blank">
+          <div class="resource-icon">📰</div>
+          <div class="resource-info">
+            <div class="resource-title">Generative AI Explained — Financial Times</div>
+            <div class="resource-desc">Интерактивная визуализация: как LLM обрабатывает текст шаг за шагом.</div>
+          </div>
+          <span class="resource-tag tag-article">Статья</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=wjZofJX0v4M" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Attention is All You Need — визуальное объяснение</div>
+            <div class="resource-desc">3Blue1Brown объясняет архитектуру Transformer с анимациями.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+        <a class="resource-link" href="https://bbycroft.net/llm" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">LLM Visualization — bbycroft.net</div>
+            <div class="resource-desc">3D-визуализация работы GPT в реальном времени. Кликай и смотри, что происходит внутри.</div>
+          </div>
+          <span class="resource-tag tag-tool">Интерактив</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="1-1">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Посмотри видео Andrej Karpathy "Intro to LLMs" (хотя бы первые 30 минут)</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Открой bbycroft.net/llm и поиграй с визуализацией — пойми, как токены проходят через слои</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Задай один и тот же вопрос в ChatGPT (chat.openai.com) и Claude (claude.ai). Сравни ответы — запиши 3 отличия</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Поэкспериментируй с temperature: попроси ChatGPT написать слоган, поставь temperature 0, потом 1.5. Заметь разницу</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('welcome')">← Назад</button>
+        <button class="btn btn-complete" id="complete-1-1" onclick="completeLesson('1-1')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('1-2')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 1-2: Ландшафт AI 2026 ══════════ -->
+    <div class="lesson" id="lesson-1-2">
+      <span class="lesson-badge badge-theory">Теория + Практика</span>
+      <h2>Ландшафт AI-инструментов 2026</h2>
+      <div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 1, Урок 2</span></div>
+
+      <p>AI-инструментов сотни. Чтобы не утонуть, нужно понять карту: <strong>что для чего использовать</strong>. Профессионалы не привязаны к одному инструменту — они выбирают лучший под задачу.</p>
+
+      <h3>Чат-боты: твои основные рабочие инструменты</h3>
+      <ul>
+        <li><strong>ChatGPT</strong> — самый популярный. GPT-4o: быстрый, мультимодальный, хорошие плагины. $20/мес за Plus.</li>
+        <li><strong>Claude</strong> — лучший для длинных документов и кода. 200K контекст. $20/мес за Pro.</li>
+        <li><strong>Gemini</strong> — интеграция с Google Workspace, огромный контекст. Бесплатная версия сильная.</li>
+        <li><strong>Perplexity</strong> — AI-поиск с источниками. Идеален для ресёрча.</li>
+        <li><strong>DeepSeek</strong> — бесплатный, open-source, сильный в рассуждениях.</li>
+      </ul>
+
+      <h3>Когда какой использовать</h3>
+      <div class="comparison">
+        <div class="comparison-good">
+          <div class="comparison-label">📝 Текст и анализ</div>
+          <div class="comparison-text">Claude — лучше всех работает с длинными документами, договорами, отчётами. Загрузи PDF и задавай вопросы.</div>
+        </div>
+        <div class="comparison-good">
+          <div class="comparison-label">🔍 Поиск и факты</div>
+          <div class="comparison-text">Perplexity — ищет в интернете и даёт ответ с источниками. Не галлюцинирует с фактами.</div>
+        </div>
+      </div>
+      <div class="comparison">
+        <div class="comparison-good">
+          <div class="comparison-label">💻 Код</div>
+          <div class="comparison-text">Claude и GPT-4o — оба сильны. Claude Code — лучший AI для терминала. Cursor — для IDE.</div>
+        </div>
+        <div class="comparison-good">
+          <div class="comparison-label">🎨 Картинки</div>
+          <div class="comparison-text">Midjourney — художественные. DALL-E 3 (через ChatGPT) — быстрые и точные по описанию.</div>
+        </div>
+      </div>
+
+      <h3>AI для разработки (что будем использовать в курсе)</h3>
+      <ul>
+        <li><strong>Cursor</strong> — AI-редактор кода на базе VS Code. Встроенный чат с кодовой базой.</li>
+        <li><strong>Claude Code</strong> — AI-ассистент в терминале. Может читать файлы, писать код, запускать команды.</li>
+        <li><strong>Replit Agent</strong> — описываешь приложение текстом, AI создаёт и деплоит его.</li>
+        <li><strong>v0.dev</strong> (Vercel) — генерирует UI-компоненты по описанию.</li>
+      </ul>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://chat.openai.com" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">ChatGPT</div>
+            <div class="resource-desc">Зарегистрируйся, если ещё нет. Бесплатная версия уже мощная.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://claude.ai" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Claude</div>
+            <div class="resource-desc">Основной инструмент курса. Зарегистрируйся и попробуй загрузить документ.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://perplexity.ai" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Perplexity AI</div>
+            <div class="resource-desc">AI-поиск с источниками. Замена Google для ресёрча.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://aistudio.google.com" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Google AI Studio</div>
+            <div class="resource-desc">Бесплатный доступ к Gemini. Можно тестировать промты и получить API-ключ.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=jV-RZsr0vMc" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">AI Tools Tier List 2025 — Fireship</div>
+            <div class="resource-desc">Обзор всех AI-инструментов за 10 минут от Fireship.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="1-2">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Зарегистрируйся во всех четырёх: ChatGPT, Claude, Perplexity, Google AI Studio</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Задай сложный бизнес-вопрос во всех четырёх. Например: "Как выстроить воронку продаж для B2B SaaS с чеком $500/мес". Сравни ответы</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Загрузи PDF-документ (любой договор или отчёт) в Claude. Попроси суммировать и задай вопросы по содержанию</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Используй Perplexity для реального рабочего вопроса. Обрати внимание на источники — насколько они точны?</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('1-1')">← Назад</button>
+        <button class="btn btn-complete" id="complete-1-2" onclick="completeLesson('1-2')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('1-3')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 1-3: Мультимодальность ══════════ -->
+    <div class="lesson" id="lesson-1-3">
+      <span class="lesson-badge badge-practice">Практика</span>
+      <h2>Мультимодальность: не только текст</h2>
+      <div class="lesson-meta"><span>📖 ~20 мин</span><span>Фаза 1, Урок 3</span></div>
+
+      <p>Современные LLM работают не только с текстом. <strong>GPT-4o, Claude и Gemini</strong> понимают изображения, аудио, PDF, таблицы и даже видео. Это меняет правила игры — AI становится универсальным инструментом.</p>
+
+      <h3>Что умеют мультимодальные модели</h3>
+      <ul>
+        <li><strong>Анализ изображений</strong> — загрузи фото, скриншот, диаграмму → AI опишет, объяснит, извлечёт данные</li>
+        <li><strong>Работа с PDF</strong> — загрузи договор, отчёт, презентацию → AI суммирует, ответит на вопросы</li>
+        <li><strong>Распознавание аудио</strong> — Whisper (OpenAI) транскрибирует речь с точностью 95%+</li>
+        <li><strong>Генерация изображений</strong> — DALL-E 3, Midjourney, Stable Diffusion</li>
+        <li><strong>Генерация голоса</strong> — OpenAI TTS, ElevenLabs — текст в естественную речь</li>
+      </ul>
+
+      <h3>Практические сценарии</h3>
+      <p>📸 <strong>Фото визитки</strong> → загрузи в Claude → получи структурированный контакт в JSON</p>
+      <p>📊 <strong>Скриншот дашборда</strong> → загрузи в GPT-4o → получи анализ и рекомендации</p>
+      <p>📄 <strong>Длинный договор (PDF)</strong> → загрузи в Claude → "выдели все риски для заказчика"</p>
+      <p>🎙 <strong>Аудиозапись встречи</strong> → Whisper → текст → Claude → саммари с action items</p>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://platform.openai.com/docs/guides/vision" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">OpenAI Vision Guide</div>
+            <div class="resource-desc">Официальная документация по работе GPT-4o с изображениями.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://docs.anthropic.com/en/docs/build-with-claude/vision" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Claude Vision Docs</div>
+            <div class="resource-desc">Работа Claude с изображениями: типы файлов, лимиты, лучшие практики.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://platform.openai.com/docs/guides/speech-to-text" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Whisper API — Speech to Text</div>
+            <div class="resource-desc">Распознавание речи от OpenAI. Поддерживает 50+ языков.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=FW6mI4Yw8Qs" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">GPT-4 Vision — полный обзор возможностей</div>
+            <div class="resource-desc">Практические примеры работы с изображениями через GPT-4o.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="1-3">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Сфотографируй любой документ и загрузи в Claude — попроси извлечь данные в таблицу</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Сделай скриншот графика/дашборда и загрузи в ChatGPT — попроси объяснить тренды</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Загрузи рабочий PDF (отчёт, договор) в Claude и задай 5 конкретных вопросов по содержанию</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй DALL-E 3 в ChatGPT: сгенерируй логотип или иллюстрацию для бизнес-презентации</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('1-2')">← Назад</button>
+        <button class="btn btn-complete" id="complete-1-3" onclick="completeLesson('1-3')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('2-1')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 2-1: Анатомия промта ══════════ -->
+    <div class="lesson" id="lesson-2-1">
+      <span class="lesson-badge badge-theory">Теория + Практика</span>
+      <h2>Анатомия идеального промта</h2>
+      <div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 2, Урок 1</span></div>
+
+      <p><strong>Промт-инжиниринг</strong> — это навык номер один для работы с AI. Качество ответа на 80% зависит от качества запроса. Это как разница между "сделай сайт" и детальным ТЗ с макетами.</p>
+
+      <h3>Плохой vs хороший промт</h3>
+      <div class="comparison">
+        <div class="comparison-bad">
+          <div class="comparison-label">❌ Плохо</div>
+          <div class="comparison-text">"Напиши коммерческое предложение"</div>
+        </div>
+        <div class="comparison-good">
+          <div class="comparison-label">✅ Хорошо</div>
+          <div class="comparison-text">"Ты — опытный B2B копирайтер. Напиши коммерческое предложение для IT-компании, которая предлагает внедрение AI-чатботов для банков. Целевая аудитория — директора по цифровизации. Тон: профессиональный, но не сухой. Объём: 1 страница. Структура: боль → решение → кейс → CTA."</div>
+        </div>
+      </div>
+
+      <h3>5 элементов идеального промта</h3>
+      <ol>
+        <li><strong>Роль</strong> — кем должен быть AI ("Ты — senior Python-разработчик с 10 годами опыта")</li>
+        <li><strong>Контекст</strong> — что AI нужно знать ("Я делаю Telegram-бота для ресторана...")</li>
+        <li><strong>Задача</strong> — что конкретно сделать ("Напиши функцию, которая...")</li>
+        <li><strong>Формат</strong> — как должен выглядеть ответ ("В формате JSON / таблицы / пошагово")</li>
+        <li><strong>Ограничения</strong> — чего НЕ делать ("Не используй внешние библиотеки", "Максимум 200 слов")</li>
+      </ol>
+
+      <h3>Few-shot: покажи пример — получи формат</h3>
+      <p>Самый мощный приём: покажи AI 1–3 примера того, что хочешь получить. Модель повторит формат.</p>
+      <div class="code-block"><span class="comment">// Few-shot промт для классификации</span>
+
+Классифицируй обращение клиента:
+
+Пример 1: "Не могу войти в аккаунт" → Категория: Авторизация, Приоритет: Высокий
+Пример 2: "Когда будет скидка?" → Категория: Продажи, Приоритет: Низкий
+Пример 3: "Приложение крашится при оплате" → Категория: Баг, Приоритет: Критический
+
+Теперь классифицируй: "Хочу изменить email в профиле"</div>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Anthropic Prompt Engineering Guide</div>
+            <div class="resource-desc">Лучший гайд по промтингу. Читать целиком — обязательно.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://platform.openai.com/docs/guides/prompt-engineering" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">OpenAI Prompt Engineering Guide</div>
+            <div class="resource-desc">6 стратегий от OpenAI для улучшения промтов. Коротко и по делу.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.promptingguide.ai" target="_blank">
+          <div class="resource-icon">📰</div>
+          <div class="resource-info">
+            <div class="resource-title">Prompting Guide</div>
+            <div class="resource-desc">Энциклопедия техник промтинга с примерами. Есть на русском.</div>
+          </div>
+          <span class="resource-tag tag-article">Справочник</span>
+        </a>
+        <a class="resource-link" href="https://learnprompting.org" target="_blank">
+          <div class="resource-icon">📚</div>
+          <div class="resource-info">
+            <div class="resource-title">Learn Prompting — бесплатный курс</div>
+            <div class="resource-desc">Интерактивный курс от новичка до продвинутого. С упражнениями.</div>
+          </div>
+          <span class="resource-tag tag-course">Курс</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="2-1">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай Anthropic Prompt Engineering Guide целиком (20 мин)</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Возьми реальную рабочую задачу. Напиши промт по формуле (роль + контекст + задача + формат + ограничения)</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попрактикуй few-shot: создай промт с 3 примерами для классификации чего-то из твоей работы</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Сравни ответ на один и тот же промт в ChatGPT и Claude. Запиши, какая модель лучше справилась и почему</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('1-3')">← Назад</button>
+        <button class="btn btn-complete" id="complete-2-1" onclick="completeLesson('2-1')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('2-2')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 2-2: Продвинутые техники ══════════ -->
+    <div class="lesson" id="lesson-2-2">
+      <span class="lesson-badge badge-theory">Теория + Практика</span>
+      <h2>Продвинутые техники промтинга</h2>
+      <div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 2, Урок 2</span></div>
+
+      <p>Базовый промтинг — это 20% возможностей. Дальше — техники, которые используют AI-инженеры в продакшне.</p>
+
+      <h3>1. Chain-of-Thought (CoT) — цепочка рассуждений</h3>
+      <p>Добавь "Думай пошагово" или "Рассуждай шаг за шагом" — и точность ответов на сложные задачи вырастает на 30-50%.</p>
+      <div class="code-block"><span class="comment">// Без CoT — модель часто ошибается:</span>
+В магазине было 23 яблока. Купили 3 пакета по 8 яблок и продали 15. Сколько осталось?
+
+<span class="comment">// С CoT — пошаговое рассуждение:</span>
+В магазине было 23 яблока. Купили 3 пакета по 8 яблок и продали 15.
+Сколько осталось? <span class="highlight">Рассуждай пошагово, показывая каждое вычисление.</span></div>
+
+      <h3>2. ReAct — рассуждение + действие</h3>
+      <p>Паттерн для агентов: модель <strong>думает</strong> ("мне нужно узнать X") → <strong>действует</strong> (вызывает инструмент) → <strong>наблюдает</strong> (анализирует результат) → повторяет.</p>
+
+      <h3>3. Self-Consistency — самопроверка</h3>
+      <p>Попроси модель решить задачу 3 раза разными способами и выбрать ответ, который совпал чаще всего.</p>
+
+      <h3>4. Tree-of-Thought — дерево мыслей</h3>
+      <p>Для сложных задач: попроси рассмотреть несколько подходов, оценить каждый, выбрать лучший.</p>
+      <div class="code-block">Предложи 3 разных подхода к решению этой задачи.
+Для каждого подхода:
+1. Опиши стратегию в 2 предложениях
+2. Оцени плюсы и минусы
+3. Дай оценку по шкале 1-10
+
+Затем выбери лучший подход и реализуй его.</div>
+
+      <h3>5. Structured Output — структурированный вывод</h3>
+      <p>Попроси ответ в JSON, Markdown-таблице, XML — и модель выдаст ровно в нужном формате.</p>
+      <div class="code-block">Проанализируй этот отзыв клиента и верни результат в JSON:
+{
+  "sentiment": "positive/negative/neutral",
+  "topics": ["тема1", "тема2"],
+  "urgency": 1-5,
+  "suggested_action": "текст"
+}</div>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://www.promptingguide.ai/techniques/cot" target="_blank">
+          <div class="resource-icon">📰</div>
+          <div class="resource-info">
+            <div class="resource-title">Chain-of-Thought Prompting — Prompting Guide</div>
+            <div class="resource-desc">Подробный разбор CoT с примерами и исследованиями.</div>
+          </div>
+          <span class="resource-tag tag-article">Статья</span>
+        </a>
+        <a class="resource-link" href="https://www.promptingguide.ai/techniques/react" target="_blank">
+          <div class="resource-icon">📰</div>
+          <div class="resource-info">
+            <div class="resource-title">ReAct Prompting — Prompting Guide</div>
+            <div class="resource-desc">Паттерн "рассуждение + действие" — основа AI-агентов.</div>
+          </div>
+          <span class="resource-tag tag-article">Статья</span>
+        </a>
+        <a class="resource-link" href="https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/" target="_blank">
+          <div class="resource-icon">📚</div>
+          <div class="resource-info">
+            <div class="resource-title">ChatGPT Prompt Engineering for Developers — DeepLearning.AI</div>
+            <div class="resource-desc">Бесплатный курс от Andrew Ng и OpenAI. 1 час. Обязателен к просмотру.</div>
+          </div>
+          <span class="resource-tag tag-course">Курс</span>
+        </a>
+        <a class="resource-link" href="https://github.com/anthropics/anthropic-cookbook" target="_blank">
+          <div class="resource-icon">💻</div>
+          <div class="resource-info">
+            <div class="resource-title">Anthropic Cookbook — GitHub</div>
+            <div class="resource-desc">Примеры промтов и паттернов для Claude. Jupyter notebooks с кодом.</div>
+          </div>
+          <span class="resource-tag tag-docs">Код</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="2-2">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Пройди бесплатный курс DeepLearning.AI "Prompt Engineering for Developers" (1 час)</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попрактикуй CoT: задай сложный бизнес-вопрос с "рассуждай пошагово" и без. Сравни качество</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай промт с Tree-of-Thought для реальной задачи (выбор стратегии, решение проблемы)</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши промт для Structured Output: получи JSON из неструктурированного текста (отзывы, резюме, описания)</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('2-1')">← Назад</button>
+        <button class="btn btn-complete" id="complete-2-2" onclick="completeLesson('2-2')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('2-3')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ 2-3: Промты для бизнеса ══════════ -->
+    <div class="lesson" id="lesson-2-3">
+      <span class="lesson-badge badge-practice">Практика</span>
+      <h2>Промты для бизнеса: готовые шаблоны</h2>
+      <div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 2, Урок 3</span></div>
+
+      <p>Теория без практики — ничто. Вот набор промтов, которые сразу можно использовать в работе.</p>
+
+      <h3>Маркетинг и контент</h3>
+      <div class="code-block"><span class="accent">Роль:</span> Ты — контент-маркетолог с опытом в B2B SaaS.
+<span class="accent">Задача:</span> Напиши 5 постов для Telegram-канала нашей компании.
+<span class="accent">Контекст:</span> Мы продаём CRM для малого бизнеса. ЦА — владельцы компаний 20-100 чел.
+<span class="accent">Формат:</span> Каждый пост: заголовок (до 10 слов) + текст (до 150 слов) + CTA.
+<span class="accent">Тон:</span> Разговорный, экспертный, без канцеляризмов.
+<span class="accent">Ограничения:</span> Не используй слова "уникальный", "инновационный", "лучший на рынке".</div>
+
+      <h3>Анализ и стратегия</h3>
+      <div class="code-block"><span class="accent">Роль:</span> Ты — бизнес-аналитик McKinsey.
+<span class="accent">Задача:</span> Проведи SWOT-анализ нашей компании.
+<span class="accent">Контекст:</span> [вставь описание бизнеса, рынка, конкурентов]
+<span class="accent">Формат:</span> Таблица 2×2 (Strengths, Weaknesses, Opportunities, Threats).
+По каждому пункту: факт + рекомендация.
+Затем: ТОП-3 стратегических приоритета на следующий квартал.</div>
+
+      <h3>Код и техническое ревью</h3>
+      <div class="code-block"><span class="accent">Роль:</span> Senior Python developer, специалист по code review.
+<span class="accent">Задача:</span> Проведи ревью этого кода.
+<span class="accent">Формат ответа:</span>
+1. Критические проблемы (баги, безопасность)
+2. Качество кода (читаемость, naming, структура)
+3. Производительность
+4. Рекомендации по улучшению с примерами кода
+<span class="accent">Ограничения:</span> Не переписывай весь код. Покажи только изменённые участки.
+
+[вставь код]</div>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://github.com/openai/openai-cookbook" target="_blank">
+          <div class="resource-icon">💻</div>
+          <div class="resource-info">
+            <div class="resource-title">OpenAI Cookbook — GitHub</div>
+            <div class="resource-desc">Десятки примеров промтов и интеграций. Jupyter notebooks.</div>
+          </div>
+          <span class="resource-tag tag-docs">Код</span>
+        </a>
+        <a class="resource-link" href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Anthropic: Use XML Tags in Prompts</div>
+            <div class="resource-desc">Как структурировать длинные промты с XML-тегами для Claude.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=T9aRN5JkmL8" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Advanced Prompt Engineering — Full Course</div>
+            <div class="resource-desc">freeCodeCamp: 3.5 часа продвинутого промтинга с примерами.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="2-3">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай 3 бизнес-промта для своей реальной работы (маркетинг, аналитика, документы)</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попрактикуй XML-теги: оберни контекст, задачу и формат в XML-теги для Claude и сравни результат</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай "библиотеку промтов" — сохрани 5 лучших промтов в Notion/заметки для повторного использования</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй мета-промтинг: попроси Claude "напиши оптимальный промт для задачи X" и используй результат</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('2-2')">← Назад</button>
+        <button class="btn btn-complete" id="complete-2-3" onclick="completeLesson('2-3')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('3-1')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ PHASES 3-10 (condensed but real content) ══════════ -->
+
+    <!-- 3-1: Google AI Studio -->
+    <div class="lesson" id="lesson-3-1">
+      <span class="lesson-badge badge-practice">Практика</span>
+      <h2>Google AI Studio: приложения за минуты</h2>
+      <div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 3, Урок 1</span></div>
+
+      <p>Google AI Studio — бесплатная платформа для прототипирования AI-приложений. Можно создать чат-бота, мультимодального ассистента и даже получить API-ключ для Gemini — без строчки кода.</p>
+
+      <h3>Что можно сделать</h3>
+      <ul>
+        <li><strong>Chat prompt</strong> — настроить поведение чат-бота через system prompt</li>
+        <li><strong>Structured prompt</strong> — задать формат ответов через примеры (few-shot)</li>
+        <li><strong>Multimodal</strong> — загрузить изображения, аудио, видео в промт</li>
+        <li><strong>Code generation</strong> — сгенерировать код приложения по описанию</li>
+        <li><strong>Get API key</strong> — бесплатный API-ключ для Gemini (15 запросов/мин)</li>
+      </ul>
+
+      <h3>Практика: создаём AI-ассистента</h3>
+      <ol>
+        <li>Открой <a href="https://aistudio.google.com" target="_blank" style="color: var(--accent-light)">aistudio.google.com</a></li>
+        <li>Выбери "Create new → Chat prompt"</li>
+        <li>В System instructions напиши роль: "Ты — AI-консультант компании [название]. Отвечаешь на вопросы клиентов. Тон: дружелюбный, профессиональный."</li>
+        <li>Протестируй в чате</li>
+        <li>Нажми "Get code" — получи Python-код для интеграции</li>
+      </ol>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://aistudio.google.com" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Google AI Studio</div>
+            <div class="resource-desc">Открой и начни эксперименты. Бесплатный доступ к Gemini.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://ai.google.dev/gemini-api/docs" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Gemini API Docs</div>
+            <div class="resource-desc">Документация Gemini API: модели, pricing, лимиты.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=kBb_QIBNMaQ" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Google AI Studio Full Tutorial</div>
+            <div class="resource-desc">Пошаговое руководство по всем возможностям AI Studio.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="3-1">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай AI-консультанта в Google AI Studio с system prompt для реального бизнес-кейса</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй мультимодальный промт: загрузи изображение и текст вместе</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Нажми "Get API key" — сохрани ключ (пригодится для Фазы 5)</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Нажми "Get code" для своего чат-бота и изучи сгенерированный Python-код</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('2-3')">← Назад</button>
+        <button class="btn btn-complete" id="complete-3-1" onclick="completeLesson('3-1')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('3-2')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- 3-2: Cursor и Claude Code -->
+    <div class="lesson" id="lesson-3-2">
+      <span class="lesson-badge badge-practice">Практика</span>
+      <h2>Cursor и Claude Code: AI-IDE</h2>
+      <div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 3, Урок 2</span></div>
+
+      <p><strong>Vibe coding</strong> — программирование через разговор с AI. Ты описываешь, что хочешь, AI пишет код. Два главных инструмента: <strong>Cursor</strong> (графический IDE) и <strong>Claude Code</strong> (в терминале).</p>
+
+      <h3>Cursor</h3>
+      <p>Это VS Code на стероидах. Встроенный AI-чат видит весь проект и может редактировать файлы. Ctrl+K — задай вопрос или дай команду прямо в коде. Tab — автодополнение на уровне всего файла.</p>
+
+      <h3>Claude Code</h3>
+      <p>AI-ассистент в терминале. Может читать файлы, писать код, запускать команды, работать с git. Лучший инструмент для опытных разработчиков.</p>
+
+      <div class="info-block tip">
+        <div class="block-title">💡 С чего начать</div>
+        <p>Если нет опыта программирования — начни с Cursor. Он визуальный, понятный, можно тыкать мышкой. Claude Code — это следующий шаг, когда освоишь терминал.</p>
+      </div>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://www.cursor.com" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Cursor — AI Code Editor</div>
+            <div class="resource-desc">Скачай и установи. Бесплатный tier с ограничениями.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Claude Code Documentation</div>
+            <div class="resource-desc">Официальная документация Claude Code: установка, команды, возможности.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=gqUQbjsYZLQ" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Cursor AI Tutorial for Beginners</div>
+            <div class="resource-desc">Полное руководство по Cursor с нуля. Все горячие клавиши и приёмы.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=NrQcOTY3NMM" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Vibe Coding с Claude Code</div>
+            <div class="resource-desc">Как создавать приложения через терминальный AI-ассистент.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="3-2">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи Cursor (cursor.com). Создай пустой проект и попроси AI написать простую веб-страницу</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй Ctrl+K в Cursor: выдели код и попроси "добавь кнопку" или "измени цвет"</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попроси Cursor создать калькулятор или todo-list — целое приложение через чат</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай Claude Code docs — пойми, что он умеет (пригодится дальше)</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('3-1')">← Назад</button>
+        <button class="btn btn-complete" id="complete-3-2" onclick="completeLesson('3-2')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('3-3')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- 3-3: Replit Agent -->
+    <div class="lesson" id="lesson-3-3">
+      <span class="lesson-badge badge-project">Проект</span>
+      <h2>Replit Agent: приложение за разговор</h2>
+      <div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 3, Урок 3</span></div>
+
+      <p>Replit Agent — самый "магический" из vibe-coding инструментов. Опиши приложение словами → AI создаст код, базу данных, UI → деплоит за тебя. Идеален для MVP.</p>
+
+      <h3>Что можно создать</h3>
+      <ul>
+        <li>Лендинг с формой обратной связи</li>
+        <li>Дашборд с графиками из базы данных</li>
+        <li>Чат-бот с веб-интерфейсом</li>
+        <li>CRUD-приложение (список клиентов, задач, проектов)</li>
+        <li>API-сервис с документацией</li>
+      </ul>
+
+      <h3>Проект: веб-приложение "AI-консультант"</h3>
+      <ol>
+        <li>Открой <a href="https://replit.com" target="_blank" style="color: var(--accent-light)">replit.com</a>, создай аккаунт</li>
+        <li>Нажми "Create Repl" → "Agent"</li>
+        <li>Опиши: "Создай веб-приложение — AI-чатбот для сайта. Пользователь задаёт вопрос, бот отвечает через OpenAI API. Интерфейс: тёмная тема, как у ChatGPT. Сохраняй историю в SQLite."</li>
+        <li>Наблюдай, как AI создаёт всё за тебя</li>
+        <li>Нажми "Deploy" — получи публичную ссылку</li>
+      </ol>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://replit.com" target="_blank">
+          <div class="resource-icon">🔧</div>
+          <div class="resource-info">
+            <div class="resource-title">Replit</div>
+            <div class="resource-desc">Облачная IDE с AI Agent. Бесплатный tier.</div>
+          </div>
+          <span class="resource-tag tag-tool">Инструмент</span>
+        </a>
+        <a class="resource-link" href="https://docs.replit.com/category/agent" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Replit Agent Docs</div>
+            <div class="resource-desc">Документация Replit Agent: как описывать проекты, лучшие практики.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=IYiVPrxY8-Y" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Replit Agent — построил SaaS за 30 минут</div>
+            <div class="resource-desc">Практический пример создания полноценного приложения через Replit Agent.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="3-3">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай аккаунт на Replit и попробуй Agent — опиши любое простое приложение</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай проект "AI-чатбот для сайта" по инструкции выше</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Задеплой проект и получи публичную ссылку</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Изучи сгенерированный код — попробуй понять структуру (index.html, server.py, database)</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('3-2')">← Назад</button>
+        <button class="btn btn-complete" id="complete-3-3" onclick="completeLesson('3-3')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('4-1')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ PHASE 4-10: Remaining lessons ══════════ -->
+    <!-- Each follows same pattern: badge, content, resources with real links, tasks -->
+
+    <div class="lesson" id="lesson-4-1">
+      <span class="lesson-badge badge-theory">Теория + Практика</span>
+      <h2>Основы Python: быстрый старт</h2>
+      <div class="lesson-meta"><span>📖 ~40 мин</span><span>Фаза 4, Урок 1</span></div>
+
+      <p>Python — язык номер один для AI. Он простой, читаемый и имеет огромную экосистему библиотек. Цель не стать программистом — а уметь читать и модифицировать AI-код.</p>
+
+      <h3>Установка</h3>
+      <ol>
+        <li>Скачай Python 3.12+ с <a href="https://python.org" target="_blank" style="color: var(--accent-light)">python.org</a></li>
+        <li>Установи VS Code с расширением Python</li>
+        <li>Или используй <a href="https://replit.com" target="_blank" style="color: var(--accent-light)">Replit</a> прямо в браузере — ничего устанавливать не нужно</li>
+      </ol>
+
+      <h3>Базовые типы данных</h3>
+      <div class="code-block"><span class="comment"># Числа</span>
+age = 35
+price = 99.90
+
+<span class="comment"># Строки</span>
+name = <span class="string">"Антон"</span>
+greeting = <span class="string">f"Привет, {name}! Тебе {age} лет."</span>
+
+<span class="comment"># Списки (массивы)</span>
+tools = [<span class="string">"ChatGPT"</span>, <span class="string">"Claude"</span>, <span class="string">"Gemini"</span>]
+tools.append(<span class="string">"Perplexity"</span>)
+
+<span class="comment"># Словари (ключ-значение)</span>
+client = {
+    <span class="string">"name"</span>: <span class="string">"ООО Альфа"</span>,
+    <span class="string">"revenue"</span>: 5000000,
+    <span class="string">"ai_ready"</span>: <span class="keyword">True</span>
+}
+
+<span class="comment"># Условия</span>
+<span class="keyword">if</span> client[<span class="string">"revenue"</span>] > 1000000:
+    print(<span class="string">"Крупный клиент"</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">"Малый бизнес"</span>)
+
+<span class="comment"># Циклы</span>
+<span class="keyword">for</span> tool <span class="keyword">in</span> tools:
+    print(<span class="string">f"Инструмент: {tool}"</span>)</div>
+
+      <h3>Материалы</h3>
+      <div class="resources">
+        <a class="resource-link" href="https://stepik.org/course/58852" target="_blank">
+          <div class="resource-icon">📚</div>
+          <div class="resource-info">
+            <div class="resource-title">Stepik: "Поколение Python" для начинающих</div>
+            <div class="resource-desc">Лучший бесплатный курс Python на русском. Интерактивные задачи.</div>
+          </div>
+          <span class="resource-tag tag-course">Курс</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=rfscVS0vtbw" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Python Full Course — freeCodeCamp (4.5 часа)</div>
+            <div class="resource-desc">Полный курс Python с нуля на YouTube. Для тех, кто предпочитает видео.</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+        <a class="resource-link" href="https://docs.python.org/3/tutorial/" target="_blank">
+          <div class="resource-icon">📖</div>
+          <div class="resource-info">
+            <div class="resource-title">Официальный tutorial Python</div>
+            <div class="resource-desc">Документация от создателей языка. Лаконично и точно.</div>
+          </div>
+          <span class="resource-tag tag-docs">Документация</span>
+        </a>
+        <a class="resource-link" href="https://www.youtube.com/watch?v=kqtD5dpn9C8" target="_blank">
+          <div class="resource-icon">🎬</div>
+          <div class="resource-info">
+            <div class="resource-title">Python in 100 Seconds — Fireship</div>
+            <div class="resource-desc">Быстрое введение в Python за 100 секунд. Понять "зачем".</div>
+          </div>
+          <span class="resource-tag tag-video">Видео</span>
+        </a>
+      </div>
+
+      <h3>✅ Задания</h3>
+      <ul class="task-list" data-lesson="4-1">
+        <li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи Python и VS Code (или открой Replit). Напиши print("Hello, AI!") и запусти</div></li>
+        <li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Пройди первые 3 модуля на Stepik "Поколение Python"</div></li>
+        <li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши скрипт: словарь с 5 AI-моделями и их характеристиками. Выведи через цикл</div></li>
+        <li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Используй Claude как репетитора: "объясни словари в Python на примере CRM-системы"</div></li>
+      </ul>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="goTo('3-3')">← Назад</button>
+        <button class="btn btn-complete" id="complete-4-1" onclick="completeLesson('4-1')">Урок пройден ✓</button>
+        <button class="btn btn-primary" onclick="goTo('4-2')">Далее →</button>
+      </div>
+    </div>
+
+    <!-- Remaining lessons: 4-2 through 10-3 -->
+    <!-- Each with same structure: content + real links + tasks -->
+
+    <div class="lesson" id="lesson-4-2"><span class="lesson-badge badge-theory">Теория + Практика</span><h2>Функции, модули и работа с данными</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 4, Урок 2</span></div><p>Функции — строительные блоки программ. Модули — способ организовать код. Pandas — инструмент для работы с таблицами.</p><h3>Функции</h3><div class="code-block"><span class="keyword">def</span> <span class="highlight">analyze_sentiment</span>(text, model=<span class="string">"gpt-4o"</span>):
+    <span class="string">"""Анализирует тональность текста через AI."""</span>
+    <span class="comment"># Здесь будет вызов API</span>
+    <span class="keyword">return</span> {<span class="string">"text"</span>: text, <span class="string">"sentiment"</span>: <span class="string">"positive"</span>}
+
+result = analyze_sentiment(<span class="string">"Отличный сервис!"</span>)
+print(result)</div><h3>Работа с файлами</h3><div class="code-block"><span class="keyword">import</span> json
+
+<span class="comment"># Чтение JSON</span>
+<span class="keyword">with</span> open(<span class="string">"clients.json"</span>) <span class="keyword">as</span> f:
+    clients = json.load(f)
+
+<span class="comment"># Запись JSON</span>
+<span class="keyword">with</span> open(<span class="string">"output.json"</span>, <span class="string">"w"</span>) <span class="keyword">as</span> f:
+    json.dump(results, f, ensure_ascii=<span class="keyword">False</span>, indent=2)</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://realpython.com/defining-your-own-python-function/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">Real Python: Defining Your Own Functions</div><div class="resource-desc">Подробный гайд по функциям с примерами.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://realpython.com/pandas-dataframe/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">Real Python: Pandas DataFrame Tutorial</div><div class="resource-desc">Pandas для работы с таблицами: чтение CSV/Excel, фильтры, группировки.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=vmEHCJofslg" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Pandas in 10 Minutes</div><div class="resource-desc">Быстрое введение в Pandas от Wes McKinney.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="4-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши функцию, которая принимает список клиентов и возвращает только тех, у кого revenue > 1M</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи pandas (pip install pandas). Загрузи любой CSV-файл и выведи первые 10 строк</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши скрипт, который читает JSON-файл, обрабатывает данные и записывает результат</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай Real Python tutorial по функциям (20 мин)</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('4-1')">← Назад</button><button class="btn btn-complete" id="complete-4-2" onclick="completeLesson('4-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('4-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-4-3"><span class="lesson-badge badge-theory">Теория</span><h2>ООП и асинхронность</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 4, Урок 3</span></div><p>Два продвинутых концепта, без которых не обойтись: <strong>ООП</strong> (классы) нужен для структурирования кода, <strong>async/await</strong> — для работы с API без зависаний.</p><h3>Классы</h3><div class="code-block"><span class="keyword">class</span> <span class="highlight">AIAssistant</span>:
+    <span class="keyword">def</span> __init__(self, name, model=<span class="string">"gpt-4o"</span>):
+        self.name = name
+        self.model = model
+        self.history = []
+
+    <span class="keyword">def</span> chat(self, message):
+        self.history.append({<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: message})
+        <span class="comment"># Здесь вызов API</span>
+        response = <span class="string">"AI ответ..."</span>
+        self.history.append({<span class="string">"role"</span>: <span class="string">"assistant"</span>, <span class="string">"content"</span>: response})
+        <span class="keyword">return</span> response
+
+bot = AIAssistant(<span class="string">"Консультант"</span>)
+bot.chat(<span class="string">"Привет!"</span>)</div><h3>Async/Await</h3><div class="code-block"><span class="keyword">import</span> asyncio
+<span class="keyword">import</span> httpx
+
+<span class="keyword">async def</span> <span class="highlight">fetch_data</span>(url):
+    <span class="keyword">async with</span> httpx.AsyncClient() <span class="keyword">as</span> client:
+        response = <span class="keyword">await</span> client.get(url)
+        <span class="keyword">return</span> response.json()
+
+<span class="comment"># Запуск нескольких запросов параллельно</span>
+<span class="keyword">async def</span> <span class="highlight">main</span>():
+    results = <span class="keyword">await</span> asyncio.gather(
+        fetch_data(<span class="string">"https://api.example.com/users"</span>),
+        fetch_data(<span class="string">"https://api.example.com/orders"</span>),
+    )
+    print(results)</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://realpython.com/python3-object-oriented-programming/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">Real Python: OOP in Python</div><div class="resource-desc">Полный гайд по ООП: классы, наследование, инкапсуляция.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://realpython.com/async-io-python/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">Real Python: Async IO</div><div class="resource-desc">Введение в асинхронное программирование. Обязательно для работы с API.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=ZDa-Z5JzLYM" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Socratica: Python Classes</div><div class="resource-desc">Понятное объяснение классов за 14 минут.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="4-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай класс AIAssistant из примера выше. Добавь метод clear_history()</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай Real Python: Async IO (первые 3 секции)</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши async-функцию, которая делает 3 HTTP-запроса параллельно (используй httpx)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попроси Claude объяснить разницу между sync и async на примере ресторана</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('4-2')">← Назад</button><button class="btn btn-complete" id="complete-4-3" onclick="completeLesson('4-3')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('4-4')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-4-4"><span class="lesson-badge badge-project">Проект</span><h2>Проект: Telegram-бот на Aiogram</h2><div class="lesson-meta"><span>📖 ~45 мин</span><span>Фаза 4, Урок 4</span></div><p>Собираем первый настоящий проект — Telegram-бот, который отвечает на вопросы через OpenAI API. Aiogram 3 — лучший фреймворк для ботов на Python.</p><h3>Шаг за шагом</h3><ol><li>Получи токен бота у <a href="https://t.me/BotFather" target="_blank" style="color: var(--accent-light)">@BotFather</a> в Telegram</li><li>Получи API-ключ на <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--accent-light)">platform.openai.com/api-keys</a></li><li>Установи библиотеки: <code>pip install aiogram openai python-dotenv</code></li></ol><div class="code-block"><span class="keyword">import</span> asyncio
+<span class="keyword">from</span> aiogram <span class="keyword">import</span> Bot, Dispatcher, F
+<span class="keyword">from</span> aiogram.types <span class="keyword">import</span> Message
+<span class="keyword">from</span> openai <span class="keyword">import</span> AsyncOpenAI
+
+bot = Bot(token=<span class="string">"YOUR_BOT_TOKEN"</span>)
+dp = Dispatcher()
+ai = AsyncOpenAI(api_key=<span class="string">"YOUR_OPENAI_KEY"</span>)
+
+@dp.message(F.text)
+<span class="keyword">async def</span> <span class="highlight">handle</span>(message: Message):
+    response = <span class="keyword">await</span> ai.chat.completions.create(
+        model=<span class="string">"gpt-4o-mini"</span>,
+        messages=[
+            {<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: <span class="string">"Ты — полезный AI-ассистент. Отвечай кратко."</span>},
+            {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: message.text}
+        ]
+    )
+    <span class="keyword">await</span> message.answer(response.choices[0].message.content)
+
+<span class="keyword">async def</span> <span class="highlight">main</span>():
+    <span class="keyword">await</span> dp.start_polling(bot)
+
+asyncio.run(main())</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.aiogram.dev/en/latest/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Aiogram 3 Documentation</div><div class="resource-desc">Официальная документация Aiogram. Раздел "Getting Started".</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://platform.openai.com/docs/api-reference/chat" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">OpenAI Chat Completions API</div><div class="resource-desc">Референс по Chat API. Все параметры и примеры.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=vHiSoHiNyKs" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Telegram-бот на Aiogram 3 с нуля</div><div class="resource-desc">Русскоязычный туториал: создание бота пошагово.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="4-4"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай бота у @BotFather и получи токен</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Запусти код из примера — бот должен отвечать на сообщения через GPT</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Добавь system prompt под свой бизнес: "Ты — консультант компании X..."</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Добавь историю сообщений (сохраняй messages в список для каждого пользователя)</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('4-3')">← Назад</button><button class="btn btn-complete" id="complete-4-4" onclick="completeLesson('4-4')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('5-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-5-1"><span class="lesson-badge badge-theory">Теория + Практика</span><h2>OpenAI API: полное руководство</h2><div class="lesson-meta"><span>📖 ~40 мин</span><span>Фаза 5, Урок 1</span></div><p>OpenAI API — основа 90% AI-приложений. Chat Completions, Function Calling, Structured Output, Vision — всё через один интерфейс.</p><h3>Function Calling — AI вызывает твои функции</h3><p>Ключевая возможность для агентов: ты описываешь свои функции (поиск в БД, отправка email, вызов API), а AI <strong>сам решает</strong>, когда их вызвать.</p><div class="code-block"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+client = OpenAI()
+
+tools = [{
+    <span class="string">"type"</span>: <span class="string">"function"</span>,
+    <span class="string">"function"</span>: {
+        <span class="string">"name"</span>: <span class="string">"get_weather"</span>,
+        <span class="string">"description"</span>: <span class="string">"Получить прогноз погоды для города"</span>,
+        <span class="string">"parameters"</span>: {
+            <span class="string">"type"</span>: <span class="string">"object"</span>,
+            <span class="string">"properties"</span>: {
+                <span class="string">"city"</span>: {<span class="string">"type"</span>: <span class="string">"string"</span>, <span class="string">"description"</span>: <span class="string">"Название города"</span>}
+            },
+            <span class="string">"required"</span>: [<span class="string">"city"</span>]
+        }
+    }
+}]
+
+response = client.chat.completions.create(
+    model=<span class="string">"gpt-4o"</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Какая погода в Москве?"</span>}],
+    tools=tools
+)
+<span class="comment"># AI вернёт tool_call с {"city": "Москва"}</span></div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://platform.openai.com/docs/guides/function-calling" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">OpenAI Function Calling Guide</div><div class="resource-desc">Официальный гайд. Обязательно прочитать.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">OpenAI Structured Outputs</div><div class="resource-desc">Гарантированный JSON-вывод по схеме. Идеально для парсинга.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/" target="_blank"><div class="resource-icon">📚</div><div class="resource-info"><div class="resource-title">Building Systems with ChatGPT API — DeepLearning.AI</div><div class="resource-desc">Бесплатный курс: как строить полноценные системы на OpenAI API.</div></div><span class="resource-tag tag-course">Курс</span></a><a class="resource-link" href="https://github.com/openai/openai-cookbook" target="_blank"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-title">OpenAI Cookbook — GitHub</div><div class="resource-desc">Сотни примеров: function calling, embeddings, RAG, streaming.</div></div><span class="resource-tag tag-docs">Код</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="5-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Получи API-ключ на platform.openai.com/api-keys (пополни на $5)</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши скрипт с Chat Completions API: system prompt + user message</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Реализуй Function Calling: опиши 2 функции и покажи, как AI их вызывает</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Пройди курс DeepLearning.AI "Building Systems with ChatGPT API"</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('4-4')">← Назад</button><button class="btn btn-complete" id="complete-5-1" onclick="completeLesson('5-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('5-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-5-2"><span class="lesson-badge badge-theory">Теория + Практика</span><h2>Claude API: Tool Use и Extended Thinking</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 5, Урок 2</span></div><p>Claude API от Anthropic — мощная альтернатива OpenAI с уникальными возможностями: огромный контекст (200K), Extended Thinking для сложных задач, и лучший в индустрии Tool Use.</p><div class="code-block"><span class="keyword">from</span> anthropic <span class="keyword">import</span> Anthropic
+client = Anthropic()
+
+response = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-20250514"</span>,
+    max_tokens=1024,
+    system=<span class="string">"Ты — AI-аналитик. Отвечай структурированно."</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Проанализируй тренды AI в 2026"</span>}]
+)
+print(response.content[0].text)</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.anthropic.com/en/docs/welcome" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Anthropic API Docs</div><div class="resource-desc">Полная документация: Messages API, Tool Use, Prompt Caching.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Claude Tool Use Guide</div><div class="resource-desc">Как давать Claude инструменты. Основа для агентов.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Extended Thinking</div><div class="resource-desc">Режим глубокого рассуждения Claude. Для сложных задач.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://github.com/anthropics/anthropic-cookbook" target="_blank"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-title">Anthropic Cookbook — GitHub</div><div class="resource-desc">Примеры кода: tool use, RAG, prompt caching, embeddings.</div></div><span class="resource-tag tag-docs">Код</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="5-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Получи API-ключ на console.anthropic.com</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши скрипт с Messages API (пример выше)</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Реализуй Tool Use: дай Claude инструмент "поиск в базе" и покажи, как он его вызывает</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Изучи Anthropic Cookbook на GitHub — запусти 2-3 примера</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('5-1')">← Назад</button><button class="btn btn-complete" id="complete-5-2" onclick="completeLesson('5-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('5-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-5-3"><span class="lesson-badge badge-practice">Практика</span><h2>Другие модели: Gemini, GigaChat, LiteLLM</h2><div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 5, Урок 3</span></div><p>Не привязывайся к одному провайдеру. Gemini бесплатен, GigaChat работает в России без VPN, а LiteLLM позволяет переключаться между моделями одной строкой.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://ai.google.dev/gemini-api/docs/quickstart" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Gemini API Quickstart</div><div class="resource-desc">Начни работу с Gemini API за 5 минут. Бесплатный tier.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://developers.sber.ru/docs/ru/gigachat/api/overview" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">GigaChat API</div><div class="resource-desc">Документация от Сбера. Русскоязычная модель, работает в РФ.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://github.com/BerriAI/litellm" target="_blank"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-title">LiteLLM — GitHub</div><div class="resource-desc">Один интерфейс для 100+ моделей. OpenAI-совместимый формат.</div></div><span class="resource-tag tag-tool">Инструмент</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="5-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Получи бесплатный API-ключ Gemini в Google AI Studio</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши один и тот же запрос через OpenAI, Anthropic и Gemini API. Сравни скорость, качество, стоимость</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи LiteLLM (pip install litellm). Переключи модель одной строкой</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Зарегистрируйся на developers.sber.ru и попробуй GigaChat API</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('5-2')">← Назад</button><button class="btn btn-complete" id="complete-5-3" onclick="completeLesson('5-3')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('6-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-6-1"><span class="lesson-badge badge-theory">Теория</span><h2>RAG: базы знаний для AI</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 6, Урок 1</span></div><p><strong>RAG (Retrieval-Augmented Generation)</strong> — технология, которая позволяет AI отвечать на вопросы по твоим данным: документы, FAQ, базы знаний. Это самая востребованная задача в AI-бизнесе.</p><h3>Как работает RAG</h3><ol><li><strong>Загрузка</strong> — берём документы (PDF, DOCX, сайт, FAQ)</li><li><strong>Chunking</strong> — разбиваем на куски по 500-1000 символов</li><li><strong>Embedding</strong> — превращаем каждый кусок в вектор (массив чисел)</li><li><strong>Хранение</strong> — складываем в векторную базу данных (ChromaDB, FAISS)</li><li><strong>Поиск</strong> — при вопросе ищем похожие куски по косинусному сходству</li><li><strong>Генерация</strong> — подставляем найденные куски в промт LLM</li></ol><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://www.pinecone.io/learn/retrieval-augmented-generation/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">Pinecone: What is RAG?</div><div class="resource-desc">Лучшее объяснение RAG с визуальными схемами. Читать первым.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag/" target="_blank"><div class="resource-icon">📚</div><div class="resource-info"><div class="resource-title">Building & Evaluating Advanced RAG — DeepLearning.AI</div><div class="resource-desc">Бесплатный курс от Andrew Ng. Продвинутые техники RAG.</div></div><span class="resource-tag tag-course">Курс</span></a><a class="resource-link" href="https://docs.trychroma.com/docs/overview/getting-started" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">ChromaDB — Getting Started</div><div class="resource-desc">Самая простая векторная БД. Установка: pip install chromadb.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=T-D1OfcDW1M" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">RAG from Scratch — LangChain (14 видео)</div><div class="resource-desc">Полный курс по RAG от создателей LangChain. С кодом.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="6-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай статью Pinecone "What is RAG?" целиком</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи ChromaDB (pip install chromadb). Создай коллекцию и добавь 5 текстовых фрагментов</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Начни курс DeepLearning.AI "Building & Evaluating Advanced RAG"</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Объясни своими словами (запиши в заметки): зачем нужен RAG, если у LLM и так огромный контекст?</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('5-3')">← Назад</button><button class="btn btn-complete" id="complete-6-1" onclick="completeLesson('6-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('6-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-6-2"><span class="lesson-badge badge-project">Проект</span><h2>RAG на практике: AI-консультант с базой знаний</h2><div class="lesson-meta"><span>📖 ~45 мин</span><span>Фаза 6, Урок 2</span></div><p>Собираем полноценный RAG-пайплайн: загрузка документов → chunking → embeddings → поиск → генерация ответа.</p><div class="code-block"><span class="keyword">from</span> langchain_community.document_loaders <span class="keyword">import</span> PyPDFLoader
+<span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+<span class="keyword">from</span> langchain_openai <span class="keyword">import</span> OpenAIEmbeddings, ChatOpenAI
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+<span class="keyword">from</span> langchain.chains <span class="keyword">import</span> RetrievalQA
+
+<span class="comment"># 1. Загрузка PDF</span>
+loader = PyPDFLoader(<span class="string">"company_docs.pdf"</span>)
+docs = loader.load()
+
+<span class="comment"># 2. Разбиение на куски</span>
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+chunks = splitter.split_documents(docs)
+
+<span class="comment"># 3. Создание векторной базы</span>
+vectorstore = Chroma.from_documents(chunks, OpenAIEmbeddings())
+
+<span class="comment"># 4. RAG-цепочка</span>
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(model=<span class="string">"gpt-4o"</span>),
+    retriever=vectorstore.as_retriever()
+)
+
+<span class="comment"># 5. Задаём вопрос</span>
+answer = qa.invoke(<span class="string">"Какая политика возвратов?"</span>)
+print(answer[<span class="string">"result"</span>])</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://python.langchain.com/docs/tutorials/rag/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">LangChain RAG Tutorial</div><div class="resource-desc">Пошаговый туториал RAG от LangChain. С кодом и объяснениями.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://docs.llamaindex.ai/en/stable/getting_started/starter_example/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">LlamaIndex — Starter Tutorial</div><div class="resource-desc">Альтернативный фреймворк для RAG. Проще для начинающих.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=tcqEUSNCn8I" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Build a RAG chatbot in Python — Full Tutorial</div><div class="resource-desc">Полный туториал от начала до конца. Python + LangChain + ChromaDB.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="6-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи LangChain: pip install langchain langchain-openai langchain-community chromadb pypdf</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Загрузи реальный PDF (документация, FAQ, описание продукта) и построй RAG</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Задай 10 вопросов по документу — оцени качество ответов (правильно/неправильно/частично)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Поэкспериментируй с chunk_size (500 vs 1000 vs 2000) — как влияет на качество?</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('6-1')">← Назад</button><button class="btn btn-complete" id="complete-6-2" onclick="completeLesson('6-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('6-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-6-3"><span class="lesson-badge badge-theory">Продвинутый</span><h2>Продвинутый RAG: reranking, hybrid search, eval</h2><div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 6, Урок 3</span></div><p>Базовый RAG работает на 60-70%. Продвинутые техники доводят до 90%+.</p><h3>Ключевые техники</h3><ul><li><strong>Hybrid Search</strong> — комбинация keyword (BM25) + vector search. Ловит и точные совпадения, и смысловые.</li><li><strong>Reranking</strong> — после поиска переранжируем результаты через cross-encoder модель.</li><li><strong>Contextual Chunking</strong> — добавляем контекст (заголовок, раздел) к каждому чанку.</li><li><strong>Self-RAG</strong> — модель сама решает, нужен ли поиск для ответа.</li></ul><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag/" target="_blank"><div class="resource-icon">📚</div><div class="resource-info"><div class="resource-title">Advanced RAG — DeepLearning.AI</div><div class="resource-desc">Sentence-window retrieval, auto-merging, evaluation. Бесплатно.</div></div><span class="resource-tag tag-course">Курс</span></a><a class="resource-link" href="https://github.com/explodinggradients/ragas" target="_blank"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-title">RAGAS — RAG Evaluation Framework</div><div class="resource-desc">Измеряй качество RAG: faithfulness, relevancy, correctness.</div></div><span class="resource-tag tag-tool">Инструмент</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=sVcwVQRHIc8" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Advanced RAG Techniques — Full Tutorial</div><div class="resource-desc">Reranking, hybrid search, query transformation на практике.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="6-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Заверши курс DeepLearning.AI по Advanced RAG</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Добавь reranking к своему RAG-пайплайну из урока 6-2</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи RAGAS и измерь качество своего RAG (faithfulness, answer_relevancy)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Сравни результаты: базовый RAG vs с reranking. Запиши метрики</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('6-2')">← Назад</button><button class="btn btn-complete" id="complete-6-3" onclick="completeLesson('6-3')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('7-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-7-1"><span class="lesson-badge badge-theory">Теория</span><h2>AI-агенты: что это и зачем</h2><div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 7, Урок 1</span></div><p><strong>Агент = LLM + инструменты + память + логика принятия решений.</strong> Обычный чат-бот отвечает. Агент — действует: ищет информацию, вызывает API, отправляет сообщения, принимает решения.</p><h3>Паттерн ReAct</h3><p>Основа всех агентов: <strong>Think</strong> (рассуждаю) → <strong>Act</strong> (вызываю инструмент) → <strong>Observe</strong> (смотрю результат) → <strong>Think</strong> (что дальше?) → ...</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">LLM Powered Autonomous Agents — Lilian Weng</div><div class="resource-desc">Лучшая обзорная статья по AI-агентам. От исследователя OpenAI.</div></div><span class="resource-tag tag-article">Статья</span></a><a class="resource-link" href="https://www.deeplearning.ai/short-courses/ai-agents-in-langgraph/" target="_blank"><div class="resource-icon">📚</div><div class="resource-info"><div class="resource-title">AI Agents in LangGraph — DeepLearning.AI</div><div class="resource-desc">Бесплатный курс: строим агентов на LangGraph. Обязателен.</div></div><span class="resource-tag tag-course">Курс</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=F8NKVhkZZWI" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">What are AI Agents? — IBM Technology</div><div class="resource-desc">Краткое и понятное объяснение AI-агентов за 10 минут.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="7-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай статью Lilian Weng "LLM Powered Autonomous Agents"</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Начни курс DeepLearning.AI "AI Agents in LangGraph"</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Запиши 5 бизнес-задач, которые мог бы решить AI-агент (не чат-бот, а именно агент)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Объясни разницу между чат-ботом и агентом своими словами</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('6-3')">← Назад</button><button class="btn btn-complete" id="complete-7-1" onclick="completeLesson('7-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('7-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-7-2"><span class="lesson-badge badge-project">Проект</span><h2>LangGraph: строим агента</h2><div class="lesson-meta"><span>📖 ~45 мин</span><span>Фаза 7, Урок 2</span></div><p>LangGraph — фреймворк для построения агентов как графов: ноды (действия) + рёбра (переходы) + состояние (память).</p><div class="code-block"><span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> StateGraph, MessagesState, START, END
+<span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> ToolNode, tools_condition
+<span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI
+<span class="keyword">from</span> langchain_core.tools <span class="keyword">import</span> tool
+
+@tool
+<span class="keyword">def</span> <span class="highlight">search_knowledge_base</span>(query: str) -> str:
+    <span class="string">"""Ищет информацию в базе знаний компании."""</span>
+    <span class="comment"># Здесь RAG-поиск</span>
+    <span class="keyword">return</span> <span class="string">f"Результат поиска для: {query}"</span>
+
+llm = ChatOpenAI(model=<span class="string">"gpt-4o"</span>).bind_tools([search_knowledge_base])
+
+<span class="keyword">def</span> <span class="highlight">agent</span>(state: MessagesState):
+    <span class="keyword">return</span> {<span class="string">"messages"</span>: [llm.invoke(state[<span class="string">"messages"</span>])]}
+
+graph = StateGraph(MessagesState)
+graph.add_node(<span class="string">"agent"</span>, agent)
+graph.add_node(<span class="string">"tools"</span>, ToolNode([search_knowledge_base]))
+graph.add_edge(START, <span class="string">"agent"</span>)
+graph.add_conditional_edges(<span class="string">"agent"</span>, tools_condition)
+graph.add_edge(<span class="string">"tools"</span>, <span class="string">"agent"</span>)
+
+app = graph.compile()</div><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://langchain-ai.github.io/langgraph/tutorials/introduction/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">LangGraph — Official Tutorial</div><div class="resource-desc">Пошаговый туториал: от простого агента до мультиагентной системы.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=9BPCV5TYPmg" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">LangGraph Crash Course — Tech With Tim</div><div class="resource-desc">Практический туториал LangGraph с примерами кода.</div></div><span class="resource-tag tag-video">Видео</span></a><a class="resource-link" href="https://github.com/langchain-ai/langgraph/tree/main/examples" target="_blank"><div class="resource-icon">💻</div><div class="resource-info"><div class="resource-title">LangGraph Examples — GitHub</div><div class="resource-desc">Десятки примеров агентов: RAG-агент, планировщик, мультиагент.</div></div><span class="resource-tag tag-docs">Код</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="7-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи LangGraph: pip install langgraph langchain-openai</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Запусти пример агента из кода выше</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Добавь 2 инструмента: поиск в базе знаний + отправка email (заглушка)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Пройди LangGraph Official Tutorial целиком</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('7-1')">← Назад</button><button class="btn btn-complete" id="complete-7-2" onclick="completeLesson('7-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('7-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-7-3"><span class="lesson-badge badge-theory">Продвинутый</span><h2>Мультиагентные системы</h2><div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 7, Урок 3</span></div><p>Один агент — хорошо. Команда агентов — мощнее. Один ищет, другой анализирует, третий пишет отчёт. Это как отдел, только из AI.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Anthropic: Building Agents</div><div class="resource-desc">Гайд от Anthropic по архитектуре агентных систем.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.crewai.com" target="_blank"><div class="resource-icon">🔧</div><div class="resource-info"><div class="resource-title">CrewAI</div><div class="resource-desc">Фреймворк для мультиагентных систем. Агенты с ролями и задачами.</div></div><span class="resource-tag tag-tool">Инструмент</span></a><a class="resource-link" href="https://www.deeplearning.ai/short-courses/multi-ai-agent-systems-with-crewai/" target="_blank"><div class="resource-icon">📚</div><div class="resource-info"><div class="resource-title">Multi AI Agent Systems — DeepLearning.AI</div><div class="resource-desc">Бесплатный курс по мультиагентным системам с CrewAI.</div></div><span class="resource-tag tag-course">Курс</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="7-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Пройди курс DeepLearning.AI "Multi AI Agent Systems with CrewAI"</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи CrewAI: pip install crewai. Создай команду из 2 агентов (researcher + writer)</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Спроектируй мультиагентную систему для своей бизнес-задачи (на бумаге): какие роли, какие инструменты</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Прочитай Anthropic guide по архитектуре агентов</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('7-2')">← Назад</button><button class="btn btn-complete" id="complete-7-3" onclick="completeLesson('7-3')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('8-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-8-1"><span class="lesson-badge badge-practice">Практика</span><h2>n8n: AI-автоматизация без кода</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 8, Урок 1</span></div><p><strong>n8n</strong> — визуальный конструктор автоматизаций с 400+ интеграциями. Можно построить AI-воркфлоу (Telegram → GPT → Google Sheets) за 10 минут без кода.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.n8n.io/try-it-out/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">n8n — Getting Started</div><div class="resource-desc">Запусти n8n локально за 2 минуты: npx n8n или Docker.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">n8n AI Agent Node</div><div class="resource-desc">AI-агент прямо в n8n: с инструментами, памятью и RAG.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=ZtfO_PpCFMU" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">n8n AI Workflow Tutorial</div><div class="resource-desc">Создание AI-воркфлоу с нуля: Telegram + GPT + база данных.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="8-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи n8n: npx n8n (или docker run -p 5678:5678 n8nio/n8n)</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай воркфлоу: Webhook → OpenAI → Respond. Протестируй через curl</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Добавь AI Agent node: дай ему инструмент (Google Sheets или HTTP Request)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Подключи Telegram: бот получает сообщение → n8n → GPT → ответ в Telegram</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('7-3')">← Назад</button><button class="btn btn-complete" id="complete-8-1" onclick="completeLesson('8-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('8-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-8-2"><span class="lesson-badge badge-practice">Практика</span><h2>Weweb + AI: веб-приложения визуально</h2><div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 8, Урок 2</span></div><p><strong>Weweb</strong> — визуальный конструктор веб-приложений. Подключаешь бэкенд (Supabase, Xano, API) и строишь интерфейс drag-and-drop. Идеален для MVP AI-продуктов.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.weweb.io/getting-started.html" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">WeWeb — Getting Started</div><div class="resource-desc">Официальная документация. Начни с "Your First App".</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=LkMXpUbpR6M" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">WeWeb Tutorial — Build a Web App</div><div class="resource-desc">Полный туториал: создание веб-приложения с WeWeb + Supabase.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="8-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Зарегистрируйся на weweb.io. Создай пустой проект</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай страницу с формой: поле ввода + кнопка "Спросить AI"</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Подключи OpenAI API через REST API plugin: форма → запрос → ответ на странице</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Опубликуй проект и поделись ссылкой</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('8-1')">← Назад</button><button class="btn btn-complete" id="complete-8-2" onclick="completeLesson('8-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('9-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-9-1"><span class="lesson-badge badge-theory">Теория + Практика</span><h2>STT и TTS: голосовые AI</h2><div class="lesson-meta"><span>📖 ~30 мин</span><span>Фаза 9, Урок 1</span></div><p>Голосовой AI-пайплайн: <strong>Whisper</strong> (речь → текст) → <strong>LLM</strong> (думает) → <strong>TTS</strong> (текст → речь). Можно построить голосового ассистента или нейро-сотрудника для звонков.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://platform.openai.com/docs/guides/speech-to-text" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">OpenAI Whisper API</div><div class="resource-desc">Распознавание речи: 50+ языков, 95%+ точность.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://platform.openai.com/docs/guides/text-to-speech" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">OpenAI TTS API</div><div class="resource-desc">6 голосов, естественное звучание. $15 за 1M символов.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://elevenlabs.io" target="_blank"><div class="resource-icon">🔧</div><div class="resource-info"><div class="resource-title">ElevenLabs</div><div class="resource-desc">Лучший TTS: клонирование голоса, эмоции, мультиязычность.</div></div><span class="resource-tag tag-tool">Инструмент</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="9-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Запиши голосовое сообщение и транскрибируй через Whisper API</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Сгенерируй речь через OpenAI TTS API — попробуй разные голоса</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Собери пайплайн: запись → Whisper → GPT → TTS → воспроизведение</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй ElevenLabs — клонируй свой голос (бесплатный tier)</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('8-2')">← Назад</button><button class="btn btn-complete" id="complete-9-1" onclick="completeLesson('9-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('9-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-9-2"><span class="lesson-badge badge-practice">Практика</span><h2>Локальные модели: Ollama</h2><div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 9, Урок 2</span></div><p>Зачем отправлять данные в облако, если можно запустить LLM локально? <strong>Ollama</strong> — запуск моделей одной командой. Данные не покидают компьютер.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://ollama.com" target="_blank"><div class="resource-icon">🔧</div><div class="resource-info"><div class="resource-title">Ollama</div><div class="resource-desc">Скачай и установи. Потом: ollama run llama3 — и модель работает.</div></div><span class="resource-tag tag-tool">Инструмент</span></a><a class="resource-link" href="https://huggingface.co/models" target="_blank"><div class="resource-icon">🔧</div><div class="resource-info"><div class="resource-title">Hugging Face Models</div><div class="resource-desc">Крупнейший каталог open-source моделей. 500K+ моделей.</div></div><span class="resource-tag tag-tool">Инструмент</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=GyllRd2E6fg" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Ollama: Run LLMs Locally — Full Guide</div><div class="resource-desc">Установка, выбор модели, API, интеграция с LangChain.</div></div><span class="resource-tag tag-video">Видео</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="9-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи Ollama и запусти: ollama run llama3</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Попробуй 3 модели: llama3, mistral, qwen2. Сравни скорость и качество</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Подключи Ollama как бэкенд для RAG (замени OpenAI embeddings на локальные)</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Запусти Ollama API (localhost:11434) и вызови через Python requests</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('9-1')">← Назад</button><button class="btn btn-complete" id="complete-9-2" onclick="completeLesson('9-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('9-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-9-3"><span class="lesson-badge badge-theory">Теория + Практика</span><h2>Деплой: Docker, VPS, CI/CD</h2><div class="lesson-meta"><span>📖 ~35 мин</span><span>Фаза 9, Урок 3</span></div><p>Проект на ноутбуке — это прототип. Проект на сервере — это продукт. Docker + VPS + GitHub Actions = профессиональный деплой.</p><h3>Материалы</h3><div class="resources"><a class="resource-link" href="https://docs.docker.com/get-started/" target="_blank"><div class="resource-icon">📖</div><div class="resource-info"><div class="resource-title">Docker — Getting Started</div><div class="resource-desc">Официальный гайд Docker. Первые 3 части — обязательно.</div></div><span class="resource-tag tag-docs">Документация</span></a><a class="resource-link" href="https://www.youtube.com/watch?v=pg19Z8LL06w" target="_blank"><div class="resource-icon">🎬</div><div class="resource-info"><div class="resource-title">Docker in 100 Seconds — Fireship</div><div class="resource-desc">Самое быстрое введение в Docker. Потом — полный туториал.</div></div><span class="resource-tag tag-video">Видео</span></a><a class="resource-link" href="https://www.digitalocean.com/community/tutorials" target="_blank"><div class="resource-icon">📰</div><div class="resource-info"><div class="resource-title">DigitalOcean Tutorials</div><div class="resource-desc">Лучшие туториалы по серверам, Docker, деплою. Бесплатно.</div></div><span class="resource-tag tag-article">Туториалы</span></a></div><h3>✅ Задания</h3><ul class="task-list" data-lesson="9-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Установи Docker Desktop. Запусти: docker run hello-world</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши Dockerfile для своего Telegram-бота из урока 4-4</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Арендуй VPS ($5/мес на DigitalOcean или аналог). Задеплой бота через Docker</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Настрой автоматический деплой через GitHub Actions (push → deploy)</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('9-2')">← Назад</button><button class="btn btn-complete" id="complete-9-3" onclick="completeLesson('9-3')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('10-1')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-10-1"><span class="lesson-badge badge-practice">Бизнес</span><h2>Продажа AI-проектов на заказ</h2><div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 10, Урок 1</span></div><p>Ты уже умеешь строить AI-системы. Теперь — как на этом зарабатывать. Рынок AI-проектов растёт на 40% в год.</p><h3>Типовые проекты и ценники</h3><ul><li><strong>AI чат-бот для сайта</strong> — 50-150K ₽ (RAG + интерфейс)</li><li><strong>Автоматизация бизнес-процесса</strong> — 100-300K ₽ (n8n/LangGraph + интеграции)</li><li><strong>Голосовой AI-ассистент</strong> — 200-500K ₽ (STT + LLM + TTS + телефония)</li><li><strong>AI-аналитика</strong> — 150-400K ₽ (дашборды + LLM-анализ данных)</li></ul><h3>Где искать клиентов</h3><ul><li>LinkedIn — публикуй кейсы, добавляй директоров</li><li>Telegram-каналы по AI — экспертный контент</li><li>Партнёрства — с IT-компаниями, которые не делают AI</li><li>Конференции и нетворкинг</li></ul><h3>✅ Задания</h3><ul class="task-list" data-lesson="10-1"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Составь список из 5 потенциальных клиентов, которым нужен AI (из своей сети контактов)</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши описание 3 своих AI-проектов для портфолио (даже если учебные)</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Рассчитай unit-экономику AI-чатбота: стоимость API + сервер + твоё время → цена клиенту</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Напиши шаблон КП (коммерческого предложения) для AI-проекта</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('9-3')">← Назад</button><button class="btn btn-complete" id="complete-10-1" onclick="completeLesson('10-1')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('10-2')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-10-2"><span class="lesson-badge badge-theory">Бизнес</span><h2>AI SaaS: продукт по подписке</h2><div class="lesson-meta"><span>📖 ~25 мин</span><span>Фаза 10, Урок 2</span></div><p>Проекты на заказ — это хорошо. Но SaaS (подписка) — это recurring revenue. Создай AI-продукт, который платит каждый месяц.</p><h3>Идеи AI SaaS</h3><ul><li><strong>AI-секретарь для стоматологий</strong> — записывает на приём, отвечает на вопросы</li><li><strong>AI-помощник для юристов</strong> — анализ договоров, поиск по законодательству</li><li><strong>AI-рекрутер</strong> — скрининг резюме, первичное интервью через чат-бота</li><li><strong>AI-контент-менеджер</strong> — генерация постов для SMM по расписанию</li></ul><h3>Unit-экономика</h3><p>Средний AI SaaS: $50-500/мес за клиента. Себестоимость (API + серверы): $5-50/мес. Маржа: 80-90%. Цель: 100 клиентов = $5K-50K/мес recurring.</p><h3>✅ Задания</h3><ul class="task-list" data-lesson="10-2"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Придумай 3 идеи AI SaaS для российского рынка. Для каждой: ЦА + боль + решение</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Выбери лучшую идею. Рассчитай unit-экономику: цена → себестоимость → маржа → breakeven</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Создай MVP за выходные (через Replit/Cursor) — минимальная версия, которая решает одну задачу</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Покажи MVP 3 потенциальным клиентам. Запиши обратную связь</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('10-1')">← Назад</button><button class="btn btn-complete" id="complete-10-2" onclick="completeLesson('10-2')">Урок пройден ✓</button><button class="btn btn-primary" onclick="goTo('10-3')">Далее →</button></div></div>
+
+    <div class="lesson" id="lesson-10-3"><span class="lesson-badge badge-project">Финальный проект</span><h2>Финальный проект: автономный AI-агент</h2><div class="lesson-meta"><span>📖 ~60 мин</span><span>Фаза 10, Урок 3</span></div><p>Всё, что ты изучил — в одном проекте. Построй и задеплой AI-агента, который решает реальную бизнес-задачу.</p><h3>Требования к проекту</h3><ul><li>✅ AI-агент на LangGraph с минимум 3 инструментами</li><li>✅ RAG — база знаний из реальных документов</li><li>✅ Интерфейс — Telegram-бот, веб-интерфейс или API</li><li>✅ Деплой — Docker на VPS, доступен по ссылке</li><li>✅ Мониторинг — логи, метрики, обработка ошибок</li></ul><h3>Идеи для проекта</h3><ul><li><strong>AI-консультант компании</strong> — RAG по документации + поиск по сайту + запись на встречу</li><li><strong>AI-аналитик</strong> — загрузка данных + анализ + генерация отчёта + отправка на email</li><li><strong>AI-рекрутер</strong> — скрининг резюме + генерация вопросов + оценка кандидата</li><li><strong>AI-маркетолог</strong> — анализ конкурентов + генерация контента + публикация</li></ul>
+
+      <div class="info-block key-concept">
+        <div class="block-title">🔑 Ты сделал это!</div>
+        <p>Если ты дошёл до этого урока и выполнил проект — ты знаешь больше, чем 95% людей, которые "работают с AI". Ты не пользователь ChatGPT. Ты — <strong>разработчик AI-агентов</strong>.</p>
+      </div>
+
+      <h3>✅ Задания</h3><ul class="task-list" data-lesson="10-3"><li class="task-item" data-task="0" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Выбери идею проекта и напиши ТЗ (1 страница): цель, функции, инструменты, архитектура</div></li><li class="task-item" data-task="1" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Реализуй проект: агент + RAG + интерфейс</div></li><li class="task-item" data-task="2" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Задеплой на VPS через Docker. Получи публичную ссылку</div></li><li class="task-item" data-task="3" onclick="toggleTask(this)"><div class="task-checkbox"></div><div class="task-text">Покажи проект Максиму — обсудим, что дальше 🚀</div></li></ul><div class="lesson-nav"><button class="btn btn-secondary" onclick="goTo('10-2')">← Назад</button><button class="btn btn-complete" id="complete-10-3" onclick="completeLesson('10-3')">Курс завершён! 🎉</button><div></div></div></div>
+
+  </main>
+</div>
+
+<footer style="text-align:center; padding:40px 20px; color:var(--text-secondary); font-size:13px; border-top:1px solid var(--border); margin-left:290px;">
+  <p>Курс подготовлен <strong style="color:var(--text)">Максимом Дроботом</strong> для <strong style="color:var(--text)">Антона Новикова</strong></p>
+  <p style="margin-top:8px;">Март 2026 · Вопросы → WhatsApp/Telegram</p>
+  <p style="margin-top:8px; opacity:0.5;">Сэкономлено: ~200 000 ₽. Контент актуальнее и полнее платных аналогов.</p>
+</footer>
+
+<script>
+const STORAGE_KEY = 'ai-course-anton';
+const TOTAL_LESSONS = 30;
+
+const lessons = [
+  '1-1','1-2','1-3',
+  '2-1','2-2','2-3',
+  '3-1','3-2','3-3',
+  '4-1','4-2','4-3','4-4',
+  '5-1','5-2','5-3',
+  '6-1','6-2','6-3',
+  '7-1','7-2','7-3',
+  '8-1','8-2',
+  '9-1','9-2','9-3',
+  '10-1','10-2','10-3'
+];
+
+function getState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+function goTo(id) {
+  document.querySelectorAll('.lesson').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('lesson-' + id);
+  if (el) el.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-lesson="${id}"]`);
+  if (nav) { nav.classList.add('active'); nav.scrollIntoView({block:'nearest'}); }
+  window.scrollTo(0, 0);
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+function completeLesson(id) {
+  const s = getState();
+  if (!s.completed) s.completed = [];
+  if (!s.completed.includes(id)) s.completed.push(id);
+  saveState(s);
+  updateUI();
+  const btn = document.getElementById('complete-' + id);
+  if (btn) { btn.classList.add('completed'); btn.textContent = '✓ Пройден'; }
+}
+
+function toggleTask(el) {
+  el.classList.toggle('done');
+  const lesson = el.closest('.task-list').dataset.lesson;
+  const task = el.dataset.task;
+  const s = getState();
+  if (!s.tasks) s.tasks = {};
+  if (!s.tasks[lesson]) s.tasks[lesson] = [];
+  if (el.classList.contains('done')) {
+    if (!s.tasks[lesson].includes(task)) s.tasks[lesson].push(task);
+  } else {
+    s.tasks[lesson] = s.tasks[lesson].filter(t => t !== task);
+  }
+  saveState(s);
+}
+
+function updateUI() {
+  const s = getState();
+  const completed = s.completed || [];
+
+  // Progress
+  const pct = Math.round((completed.length / TOTAL_LESSONS) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = completed.length + ' / ' + TOTAL_LESSONS + ' уроков';
+
+  // Nav dots
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const id = n.dataset.lesson;
+    if (completed.includes(id)) n.classList.add('completed');
+  });
+
+  // Complete buttons
+  completed.forEach(id => {
+    const btn = document.getElementById('complete-' + id);
+    if (btn) { btn.classList.add('completed'); btn.textContent = '✓ Пройден'; }
+  });
+
+  // Tasks
+  if (s.tasks) {
+    Object.entries(s.tasks).forEach(([lesson, tasks]) => {
+      const list = document.querySelector(`.task-list[data-lesson="${lesson}"]`);
+      if (list) {
+        tasks.forEach(t => {
+          const item = list.querySelector(`.task-item[data-task="${t}"]`);
+          if (item) item.classList.add('done');
+        });
+      }
+    });
+  }
+}
+
+// Init
+updateUI();
+</script>
+</body>
+</html>
